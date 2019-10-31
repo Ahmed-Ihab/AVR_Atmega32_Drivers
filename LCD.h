@@ -1,9 +1,9 @@
 ﻿/*
  * LCD_HEADER.h
  *
- * 
+ *
  *  Author: HOBA
- */ 
+ */
 
 
 #ifndef LCD_HEADER_H_
@@ -13,13 +13,11 @@
 #define F_CPU	8000000ul
 #endif
 
-//define libraries 
+//define libraries
 
 #include <avr/io.h>
 #include <util/delay.h>
 #include "DIO.h"
-#include "OS.h"
-#include "Keypad.h"
 #include "Timer.h"
 
 
@@ -65,16 +63,18 @@ extern uint8 LCD_Data_G[LCD_LINES][LCD_CHARACTERS+1];
 extern uint8 Char_G ;
 
 
+Function_Process_t LCD_4Bits_Initialization_OS (void);
 void LCD_Update (void);
 void LCD_Create_Character(const uint8 UDC_ID , const uint8 *const P_UDC);
 void LCD_Send_Byte(const uint8 Data , const uint8 Data_Flag);
 void LCD_Control_Cursor (const uint8 VISIBLE , const uint8 BLINKING, const uint8 ADDRESS);
 void LCD_Delay (void);
 void LCD_SetDDRAM (uint8 ADDRESS);
- 
+
+/*
 void LCD_KEYPAD_Init (void);
 void LCD_Keypad_Update (void);
-
+*/
 
 
 //---------------------------------------------------------------------------------------//
@@ -82,25 +82,25 @@ void LCD_Keypad_Update (void);
 
 #if LCD_MODE
 
-	
+
 //LCD_4Bits_FUNCTIONS PROTOTYPE
-//void LCD_4Bits_Initialization (void);
-Function_Process_t LCD_4Bits_Initialization (void);
+
+void LCD_4Bits_Initialization (void);
 void LCD_4Bits_Write_Command ( unsigned char Command );
 void LCD_4Bits_Write_Data ( unsigned char Data );
 void LCD_4Bits_Cursor_Position( unsigned char x , unsigned char y);   		// define Cursor Position in the LCD
 void LCD_4Bits_Clear (void);
 void LCD_4Bits_Shift_Right(void);
 void LCD_4Bits_Shift_Left(void);
-void LCD_4Bits_Print_Character( char row , char column , char ch );
-void LCD_4Bits_Print_String( char row , char column , char *str );
-void LCD_4Bits_Print_Number(char row , char column , long num);
+void LCD_4Bits_Print_Character( unsigned char row ,unsigned char column , unsigned char ch );
+void LCD_4Bits_Print_String( unsigned char row , unsigned char column , unsigned char *str );
+void LCD_4Bits_Print_Number(unsigned char row , unsigned char column , long num);
 
 
 
 #else
 
-	
+
 //LCD_8Bits_FUNCTIONS PROTOTYPE
 void LCD_8Bits_Initialization (void);
 void LCD_8Bits_Write_Command ( unsigned char Command );
@@ -109,9 +109,9 @@ void LCD_8Bits_Cursor_Position( unsigned char x , unsigned char y);   		// defin
 void LCD_8Bits_Clear (void);
 void LCD_8Bits_Shift_Right(void);
 void LCD_8Bits_Shift_Left(void);
-void LCD_8Bits_Print_Character( char row , char column , char ch );
-void LCD_8Bits_Print_String( char row , char column , char *str );
-void LCD_8Bits_Print_Number(char row , char column , long num);
+void LCD_8Bits_Print_Character( unsigned char row ,unsigned char column , unsigned char ch );
+void LCD_8Bits_Print_String( unsigned char row ,unsigned char column , unsigned char *str );
+void LCD_8Bits_Print_Number(unsigned char row ,unsigned char column , long num);
 
 
 #endif
