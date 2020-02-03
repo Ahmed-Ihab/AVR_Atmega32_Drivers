@@ -12,7 +12,6 @@
 #include <avr/interrupt.h>
 #include "UART_cnfg.h"
 
-
 Std_Func_t UART_init();
 
 Std_Func_t UART_send(const uint8 Data_to_sent);
