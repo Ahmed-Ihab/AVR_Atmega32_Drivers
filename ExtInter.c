@@ -117,7 +117,7 @@ Std_Func_t INTP_vidInit(void)
             else if (Interrupt_Array[Local_Loop].Name == INT1){
                 // Pull Up Resistor
 				DDRD &= ~(1<<INT1_PIN);
-                PORTD |= (1<<INT1_PIN);
+                //PORTD |= (1<<INT1_PIN);
                 // Configuration
                 switch(Interrupt_Array[Local_Loop].Trigger_Mode){
                     case INT1_LowLevel:
@@ -154,14 +154,14 @@ Std_Func_t INTP_vidInit(void)
             else if (Interrupt_Array[Local_Loop].Name == INT2) {
                 // Pull Up Resistor
 				DDRB &= ~(1<<INT2_PIN);
-                PORTB |= (1<<INT2_PIN);
+                //PORTB |= (1<<INT2_PIN);
                 // Configuration
                 switch(Interrupt_Array[Local_Loop].Trigger_Mode){
                     case INT2_FallingEdge:
-                    MCUCR &= (~(1<<ISC2));
+                    MCUCSR &= (~(1<<ISC2));
                     break;
                     case INT2_RisingEdge:
-                    MCUCR |= (1<<ISC2);
+                    MCUCSR |= (1<<ISC2);
                     break;
                     default:
                     StateVar = NOK;
@@ -323,10 +323,10 @@ void INTP2_VidSelectEvent(uint8 COPY_uint8EventState){
         if (Interrupt_Array[Local_loop].Name == INT2){
             switch(COPY_uint8EventState){
                     case INT2_FallingEdge:
-                    MCUCR &= (~(1<<ISC2));
+                    MCUCSR &= (~(1<<ISC2));
                     break;
                     case INT2_RisingEdge:
-                    MCUCR |= (1<<ISC2);
+                    MCUCSR |= (1<<ISC2);
                     break;
                     default:
                     break;

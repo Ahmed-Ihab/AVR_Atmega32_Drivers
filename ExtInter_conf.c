@@ -11,6 +11,6 @@
 Interrupt_Conf_t Interrupt_Array[Num_Of_Interrupt] =
 {
 {INT0, INT2_FallingEdge, In_Active} ,
-{INT1, INT2_FallingEdge ,Active} ,
-{INT2, INT2_FallingEdge, Active}
+{INT1, INT2_FallingEdge ,In_Active} ,
+{INT2, INT2_RisingEdge, Active}
 };
