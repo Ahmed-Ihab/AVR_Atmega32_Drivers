@@ -117,6 +117,7 @@ ACK DIO_init_PIN(uint8 PORT ,uint8 PIN, uint8 DIRECTION, uint8 PULL_RESISTOR)
 							if (DIRECTION == OUTPUT)
 							{
 								DDRA |=(1u<<PIN);
+								PORTA &= ~(1u<<PIN);
 							}
 							else if (DIRECTION == INPUT)
 							{							
@@ -128,7 +129,7 @@ ACK DIO_init_PIN(uint8 PORT ,uint8 PIN, uint8 DIRECTION, uint8 PULL_RESISTOR)
 								}
 								else if ( PULL_RESISTOR == PULLUP)
 								{
-									//PORTA |= (1u<<PIN);
+									PORTA |= (1u<<PIN);
 								}
 
 							}
@@ -138,6 +139,7 @@ ACK DIO_init_PIN(uint8 PORT ,uint8 PIN, uint8 DIRECTION, uint8 PULL_RESISTOR)
 							if (DIRECTION == OUTPUT)
 							{
 								DDRB |=(1u<<PIN);
+								PORTB &= ~(1u<<PIN);
 							}
 							else if (DIRECTION == INPUT)
 							{
@@ -158,6 +160,7 @@ ACK DIO_init_PIN(uint8 PORT ,uint8 PIN, uint8 DIRECTION, uint8 PULL_RESISTOR)
 							if (DIRECTION == OUTPUT)
 							{
 								DDRC |=(1u<<PIN);
+								PORTC &= ~(1u<<PIN);
 							}
 							else if (DIRECTION == INPUT)
 							{
@@ -178,6 +181,7 @@ ACK DIO_init_PIN(uint8 PORT ,uint8 PIN, uint8 DIRECTION, uint8 PULL_RESISTOR)
 							if (DIRECTION == OUTPUT)
 							{
 								DDRD |=(1u<<PIN);
+								PORTD &= ~(1u<<PIN);
 							}
 							else if ( DIRECTION == INPUT)
 							{
@@ -226,6 +230,12 @@ ACK DIO_init(void){
 						{
 							PORTA &= ~(1u<<DIO_cnfg_arr[loop_index].PIN);
 						}
+						
+						else if (DIO_cnfg_arr[loop_index].VALUE==NA)
+						{
+							PORTA &= ~(1u<<DIO_cnfg_arr[loop_index].PIN);
+						}
+							
 						else
 						{
 							DIO_cnfg_arr[loop_index].IS_init=NOT_INITIALIZED;
@@ -247,7 +257,7 @@ ACK DIO_init(void){
 						else
 						{
 							DIO_cnfg_arr[loop_index].IS_init=NOT_INITIALIZED;
-													STATE=NAK;
+							STATE=NAK;
 						}
 					}
 					else
@@ -258,7 +268,7 @@ ACK DIO_init(void){
 					break;
 
 					case PORT_B:
-								if (DIO_cnfg_arr[loop_index].DIR==OUTPUT)
+							if (DIO_cnfg_arr[loop_index].DIR==OUTPUT)
 							{
 								DDRB |=(1u<<DIO_cnfg_arr[loop_index].PIN);
 								if (DIO_cnfg_arr[loop_index].VALUE==HIGH)
@@ -266,6 +276,11 @@ ACK DIO_init(void){
 									PORTB |=(1u<<DIO_cnfg_arr[loop_index].PIN);
 								}
 								else if (DIO_cnfg_arr[loop_index].VALUE==LOW)
+								{
+									PORTB &= ~(1u<<DIO_cnfg_arr[loop_index].PIN);
+								}
+								
+								else if (DIO_cnfg_arr[loop_index].VALUE==NA)
 								{
 									PORTB &= ~(1u<<DIO_cnfg_arr[loop_index].PIN);
 								}
@@ -312,6 +327,12 @@ ACK DIO_init(void){
 								{
 									PORTC &= ~(1u<<DIO_cnfg_arr[loop_index].PIN);
 								}
+								
+								else if (DIO_cnfg_arr[loop_index].VALUE==NA)
+								{
+									PORTC &= ~(1u<<DIO_cnfg_arr[loop_index].PIN);
+								}
+								
 								else
 								{
 									DIO_cnfg_arr[loop_index].IS_init=NOT_INITIALIZED;
@@ -333,7 +354,7 @@ ACK DIO_init(void){
 								else
 								{
 									DIO_cnfg_arr[loop_index].IS_init=NOT_INITIALIZED;
-															STATE=NAK;
+									STATE=NAK;
 								}
 							}
 							else
@@ -352,6 +373,11 @@ ACK DIO_init(void){
 									PORTD |=(1u<<DIO_cnfg_arr[loop_index].PIN);
 								}
 								else if (DIO_cnfg_arr[loop_index].VALUE==LOW)
+								{
+									PORTD &= ~(1u<<DIO_cnfg_arr[loop_index].PIN);
+								}
+								
+								else if (DIO_cnfg_arr[loop_index].VALUE==NA)
 								{
 									PORTD &= ~(1u<<DIO_cnfg_arr[loop_index].PIN);
 								}
@@ -567,7 +593,7 @@ ACK DIO_Write_Pin(uint8 PORT ,uint8 PIN,uint8 VALUE)
 
 	ACK STATE = AK;
 	
-		if( (PIN<8) || (PIN>=0) )
+		if(  (PIN>=0) && (PIN<8))
 		{
 			
 					if((VALUE == HIGH) || (VALUE == LOW))
@@ -608,7 +634,6 @@ ACK DIO_Write_Pin(uint8 PORT ,uint8 PIN,uint8 VALUE)
 								case PORT_D:
 								if (VALUE == HIGH)
 								{
-									PORTD |= (1<<PD2);
 									PORTD |=(1u<<PIN);
 								}
 								else
