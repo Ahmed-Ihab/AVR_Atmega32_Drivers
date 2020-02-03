@@ -20,10 +20,27 @@ typedef unsigned char bool;
 #define TRUE        (1u)
 #endif
 
-#define HIGH        (1u)
-#define LOW         (0u)
+#ifndef INITIALIZED
+#define INITIALIZED			(1u)
+#endif
 
-#define NULL_PTR    ((void*)0)
+#ifndef NOT_INITIALIZED
+#define NOT_INITIALIZED		(0u)
+#endif
+
+
+#ifndef HIGH
+#define HIGH		(1u)
+#endif
+
+#ifndef LOW
+#define LOW			(0u)
+#endif
+
+#define NULL_PTR		((void*)0)
+
+#define NULL_POINTER    ((void*)0)
+
 
 typedef unsigned char         uint8;          /*           0 .. 255             */
 typedef signed char           sint8;          /*        -128 .. +127            */
@@ -36,8 +53,9 @@ typedef signed long long      sint64;
 typedef float                 float32;
 typedef double                float64;
 
-#define GPIO_WritePortPin(PORT, PIN, DATA)          ((PORT) = (PORT & (~(1 << PIN)))|(DATA << PIN))
 
+#define GPIO_InitPortPin(CONTROL, PIN, DIRECTION)   ((CONTROL) = (CONTROL & (~(1 << PIN)))|(DIRECTION << PIN))
+#define GPIO_WritePortPin(PORT, PIN, DATA)   ((PORT) = (PORT & (~(1 << PIN)))|(DATA << PIN))
 #define GPIO_ReadPortPin(PORT, PIN)    (((PORT) & (1 << PIN)) >> (PIN))
 
 typedef enum {
