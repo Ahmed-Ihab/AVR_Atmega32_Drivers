@@ -9,23 +9,21 @@
 #include "Timer.h"
 
 //-------------------  Private_Global_Varibles -------------------------------//
-static uint16 Prescalar_Factor[]={1,8,64,256,1024,0,0,32,128};
-static uint8 Flag_mode[MAX_NUM_OF_TIMERS] = {NA,NA,NA} ;			//this flag is used to check PWM_mode or non_PWM_mode
-static uint8 Controlling_Flag =0;				//this flag is used to synchronize between time_delay function and Timer_update_TCNT_Function
-static double OCR_Value[MAX_NUM_OF_TIMERS] = {0,0,0};			//this array of OCR_value to retain the last value in OCR of each Timer to avoid overwriting on OCR value in each Timer
+static uint8 Controlling_Flag =0;									//this flag is used to synchronize between time_delay function and Timer_update_TCNT_Function
+static double OCR_Value[MAX_NUM_OF_TIMERS] = {0,0,0};				//this array of OCR_value to retain the last value in OCR of each Timer to avoid overwriting on OCR value in each Timer
 static uint16 Preloaded_Value[MAX_NUM_OF_TIMERS]={0,0,0};
 
 //-------------------  Private_Function --------------------------------------//
 static ACK Polling_Delay (TIMER_t );
-static ACK interrupt_PWM ( TIMER_t );
 static void Calculate_OCR_Value (TIMER_t , double  , Delay_unit_t );
 static ACK Update_Timer_OCR_Register (TIMER_t TIMER_Select);
 
 
 //-------------------  Public_Global_Variables -------------------------------//
+uint8 PWM_Flag_mode[MAX_NUM_OF_TIMERS] = {NA,NA,NA} ;			//this flag is used to check PWM_mode or non_PWM_mode
+uint16 Prescalar_Factor[]={1,8,64,256,1024,0,0,32,128};
 uint32 OVF_Counter_Loop[MAX_NUM_OF_TIMERS]={1,1,1} ;
 uint8 Running_Flag[MAX_NUM_OF_TIMERS]={0,0,0};		//this Flag is used when your Delay occured by using Interrupt so as to run your operation which needs that delay
-uint8 PWM_Value;
 
 
 //-------------------  Public_Global_Pointer_to_function Variables -------------------------------//
@@ -75,7 +73,7 @@ ACK TIMER_init(void)
 					{
 						case NORMAL_MODE:
 						{
-							Flag_mode[loop_index]= NON_PWM_MODE;
+							PWM_Flag_mode[loop_index]= NON_PWM_MODE;
 							/*********** NORMAL_MODE TIMER0 ********/
 							TCCR0 &=  ~ ( (1u<<WGM01) | (1u<<WGM00) );	// NORMAL_MODE WGM01=0 & WGM00=0
 							//TCCR0 |= (1<<FOC0); //Non PWM mode
@@ -85,7 +83,7 @@ ACK TIMER_init(void)
 
 						case CTC_MODE:
 						{
-							Flag_mode[loop_index]=NON_PWM_MODE;
+							PWM_Flag_mode[loop_index]=NON_PWM_MODE;
 							/*********** CTC MODE *********/
 							TCCR0 |= (1u<<WGM01) ; // CTC WGM01=1
 							TCCR0 &= ( ~ (1u<<WGM00) );  // CTC  WGM00=0
@@ -96,7 +94,7 @@ ACK TIMER_init(void)
 
 						case FAST_PWM_MODE:
 						{
-							Flag_mode[loop_index] = PWM_MODE;
+							PWM_Flag_mode[loop_index] = PWM_MODE;
 							/*********** FAST PWM MODE *********/
 							TCCR0 |= ((1u << WGM01) | (1u << WGM00)); // FAST PWM MODE WGM01=1 & WGM00=1
 							DDRB |= (1u<<PB3); // OCO PIN OUTPUT
@@ -106,7 +104,7 @@ ACK TIMER_init(void)
 
 						case PHASE_CORRECT_MODE:
 						{
-							Flag_mode[loop_index] = PWM_MODE;
+							PWM_Flag_mode[loop_index] = PWM_MODE;
 							/*********** PHASE CORRECT MODE *********/
 							TCCR0 &= (~(1u << WGM01)); // PHASE CORRECT MODE  WGM01=0
 							TCCR0 |= (1u << WGM00);  // PHASE CORRECT MODE  WGM00=1
@@ -125,7 +123,7 @@ ACK TIMER_init(void)
 					}
 					/**************************** END OF WGM MODE ****************************/
 
-					switch(Flag_mode[loop_index])
+					switch(PWM_Flag_mode[loop_index])
 					{
 						case NON_PWM_MODE:
 						{
@@ -276,8 +274,8 @@ ACK TIMER_init(void)
 					break;
 					/**************************** END OF TIMER 0 ****************************/
 				}
-				//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-				//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 				/**************************** START OF TIMER 1 ****************************/
 				case TIMER1:
@@ -288,7 +286,7 @@ ACK TIMER_init(void)
 					{
 						case NORMAL_MODE:
 						{
-							Flag_mode[loop_index] = NON_PWM_MODE;
+							PWM_Flag_mode[loop_index] = NON_PWM_MODE;
 							TCNT1H=0;
 							TCNT1L=0;
 							//TCNT1=0;
@@ -299,7 +297,7 @@ ACK TIMER_init(void)
 						case CTC_MODE:
 						{
 
-							Flag_mode[loop_index]=NON_PWM_MODE;
+							PWM_Flag_mode[loop_index]=NON_PWM_MODE;
 							TCNT1H=0;
 							TCNT1L=0;
 							//TCNT1=0;
@@ -309,7 +307,7 @@ ACK TIMER_init(void)
 
 						case FAST_PWM_MODE:
 						{
-							Flag_mode[loop_index]=PWM_MODE;
+							PWM_Flag_mode[loop_index]=PWM_MODE;
 							FAST_PWM_8_BIT();
 							break;
 						}
@@ -317,7 +315,7 @@ ACK TIMER_init(void)
 						case PHASE_CORRECT_MODE:
 						{
 
-							Flag_mode[loop_index]=PWM_MODE;
+							PWM_Flag_mode[loop_index]=PWM_MODE;
 							PWM_PHASE_CORRECT_8_BIT();
 							break;
 						}
@@ -332,7 +330,7 @@ ACK TIMER_init(void)
 					/**************************** END OF WGM MODE ****************************/
 
 					/**************************** COM MODE ****************************/
-					switch(Flag_mode[loop_index])
+					switch(PWM_Flag_mode[loop_index])
 					{
 						/**************************** END OF NON PWM MODE ****************************/
 						case NON_PWM_MODE:
@@ -388,16 +386,16 @@ ACK TIMER_init(void)
 							{
 								case NON_INVERTING:
 								{
-										COM_1A_PWM_NON_INVERTED();
-										COM_1B_PWM_NON_INVERTED();
+									COM_1A_PWM_NON_INVERTED();
+									COM_1B_PWM_NON_INVERTED();
 
 									break;
 								}
 
 								case INVERTING:
 								{
-										COM_1A_PWM_INVERTED();
-										COM_1B_PWM_INVERTED();
+									COM_1A_PWM_INVERTED();
+									COM_1B_PWM_INVERTED();
 									break;
 								}
 
@@ -456,8 +454,6 @@ ACK TIMER_init(void)
 
 						case NO_INTERRUPT:
 						{
-
-
 							TIMSK &= ~(1<<TOIE1) ;
 							TIMSK &= ~(1<<TICIE1) ;
 							TIMSK &= ~(1<<TOV1) ;
@@ -490,8 +486,6 @@ ACK TIMER_init(void)
 
 						case NO_ICU_USED:
 						{
-
-
 							break;
 						}
 
@@ -523,7 +517,7 @@ ACK TIMER_init(void)
 						case NORMAL_MODE:
 						{
 
-							Flag_mode[loop_index] = NON_PWM_MODE;
+							PWM_Flag_mode[loop_index] = NON_PWM_MODE;
 							/*********** NORMAL_MODE *********/
 							TCCR2 &=  ~ (1u<<WGM21) ;	// NORMAL_MODE WGM21=0 & WGM20=0
 							TCCR2 &=  ~ (1u<<WGM20) ;	// NORMAL_MODE WGM21=0 & WGM20=0
@@ -535,7 +529,7 @@ ACK TIMER_init(void)
 						case CTC_MODE:
 						{
 
-							Flag_mode[loop_index] = NON_PWM_MODE;
+							PWM_Flag_mode[loop_index] = NON_PWM_MODE;
 							/*********** CTC MODE *********/
 							TCCR2 |= (1u<<WGM21) ; // CTC WGM21=1
 							TCCR2 &= ( ~ (1u<<WGM20) );  // CTC  WGM20=0
@@ -546,7 +540,7 @@ ACK TIMER_init(void)
 
 						case FAST_PWM_MODE:
 						{
-							Flag_mode[loop_index] = PWM_MODE;
+							PWM_Flag_mode[loop_index] = PWM_MODE;
 							/*********** FAST PWM MODE *********/
 							TCCR2 |= ((1u << WGM21) | (1u << WGM20)); // FAST PWM MODE WGM21=1 & WGM20=1
 							DDRD |= (1u<<PD7); // OC2 PIN OUTPUT
@@ -555,7 +549,7 @@ ACK TIMER_init(void)
 
 						case PHASE_CORRECT_MODE:
 						{
-							Flag_mode[loop_index] = PWM_MODE;
+							PWM_Flag_mode[loop_index] = PWM_MODE;
 							/*********** PHASE CORRECT MODE *********/
 							TCCR2 &= (~(1u << WGM21)); // PHASE CORRECT MODE  WGM21=0
 							TCCR2 |= (1u << WGM20);  // PHASE CORRECT MODE  WGM20=1
@@ -577,7 +571,7 @@ ACK TIMER_init(void)
 						/**************************** END OF WGM MODE ****************************/
 					}
 
-					switch(Flag_mode[TIMER2])
+					switch(PWM_Flag_mode[TIMER2])
 					{
 						case NON_PWM_MODE:
 						{
@@ -782,8 +776,8 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 	switch (TIMER_cnfg_arr[TIMER_Select].timer)
 	{
-		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 		/**************************** START OF TIMER0 ****************************/
 		case TIMER0:
 		{
@@ -795,7 +789,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 				case NORMAL_MODE:
 				{
 
-					Flag_mode[TIMER_Select]= NON_PWM_MODE;
+					PWM_Flag_mode[TIMER_Select]= NON_PWM_MODE;
 					/*********** NORMAL_MODE TIMER0 ********/
 					TCCR0 &=  ~ ( (1u<<WGM01) | (1u<<WGM00) );	// NORMAL_MODE WGM01=0 & WGM00=0
 					//TCCR0 |= (1<<FOC0); //Non PWM mode
@@ -805,7 +799,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 				case CTC_MODE:
 				{
-					Flag_mode[TIMER_Select]=NON_PWM_MODE;
+					PWM_Flag_mode[TIMER_Select]=NON_PWM_MODE;
 					/*********** CTC MODE *********/
 					TCCR0 |= (1u<<WGM01) ; // CTC WGM01=1
 					TCCR0 &= ( ~ (1u<<WGM00) );  // CTC  WGM00=0
@@ -816,7 +810,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 				case FAST_PWM_MODE:
 				{
-					Flag_mode[TIMER_Select] = PWM_MODE;
+					PWM_Flag_mode[TIMER_Select] = PWM_MODE;
 					/*********** FAST PWM MODE *********/
 					TCCR0 |= ((1u << WGM01) | (1u << WGM00)); // FAST PWM MODE WGM01=1 & WGM00=1
 					DDRB |= (1u<<PB3); // OCO PIN OUTPUT
@@ -826,7 +820,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 				case PHASE_CORRECT_MODE:
 				{
-					Flag_mode[TIMER_Select] = PWM_MODE;
+					PWM_Flag_mode[TIMER_Select] = PWM_MODE;
 					/*********** PHASE CORRECT MODE *********/
 					TCCR0 &= (~(1u << WGM01)); // PHASE CORRECT MODE  WGM01=0
 					TCCR0 |= (1u << WGM00);  // PHASE CORRECT MODE  WGM00=1
@@ -845,7 +839,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 			}
 			/**************************** END OF WGM MODE ****************************/
 
-			switch(Flag_mode[TIMER_Select])
+			switch(PWM_Flag_mode[TIMER_Select])
 			{
 				case NON_PWM_MODE:
 				{
@@ -1001,8 +995,8 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 			break;
 			/**************************** END OF TIMER 0 ****************************/
 		}
-		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 		/**************************** START OF TIMER 1 ****************************/
 		case TIMER1:
@@ -1013,7 +1007,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 			{
 				case NORMAL_MODE:
 				{
-					Flag_mode[TIMER_Select] = NON_PWM_MODE;
+					PWM_Flag_mode[TIMER_Select] = NON_PWM_MODE;
 					TCNT1H=0;
 					TCNT1L=0;
 					//TCNT1=0;
@@ -1024,7 +1018,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 				case CTC_MODE:
 				{
 
-					Flag_mode[TIMER_Select]=NON_PWM_MODE;
+					PWM_Flag_mode[TIMER_Select]=NON_PWM_MODE;
 					TCNT1H=0;
 					TCNT1L=0;
 					//TCNT1=0;
@@ -1034,7 +1028,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 				case FAST_PWM_MODE:
 				{
-					Flag_mode[TIMER_Select]=PWM_MODE;
+					PWM_Flag_mode[TIMER_Select]=PWM_MODE;
 					FAST_PWM_8_BIT();
 					break;
 				}
@@ -1042,7 +1036,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 				case PHASE_CORRECT_MODE:
 				{
 
-					Flag_mode[TIMER_Select]=PWM_MODE;
+					PWM_Flag_mode[TIMER_Select]=PWM_MODE;
 					PWM_PHASE_CORRECT_8_BIT();
 					break;
 				}
@@ -1057,7 +1051,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 			/**************************** END OF WGM MODE ****************************/
 
 			/**************************** COM MODE ****************************/
-			switch(Flag_mode[TIMER_Select])
+			switch(PWM_Flag_mode[TIMER_Select])
 			{
 				/**************************** END OF NON PWM MODE ****************************/
 				case NON_PWM_MODE:
@@ -1232,8 +1226,8 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 			/**************************** END OF TIMER 1 ****************************/
 		}
 
-		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 		/**************************** START OF TIMER 2 ****************************/
 		case TIMER2:
@@ -1247,8 +1241,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 				case NORMAL_MODE:
 				{
-
-					Flag_mode[TIMER_Select] = NON_PWM_MODE;
+					PWM_Flag_mode[TIMER_Select] = NON_PWM_MODE;
 					/*********** NORMAL_MODE *********/
 					TCCR2 &=  ~ (1u<<WGM21) ;	// NORMAL_MODE WGM21=0 & WGM20=0
 					TCCR2 &=  ~ (1u<<WGM20) ;	// NORMAL_MODE WGM21=0 & WGM20=0
@@ -1259,8 +1252,8 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 				case CTC_MODE:
 				{
-
-					Flag_mode[TIMER_Select] = NON_PWM_MODE;
+					
+					PWM_Flag_mode[TIMER_Select] = NON_PWM_MODE;
 					/*********** CTC MODE *********/
 					TCCR2 |= (1u<<WGM21) ; // CTC WGM21=1
 					TCCR2 &= ( ~ (1u<<WGM20) );  // CTC  WGM20=0
@@ -1271,7 +1264,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 				case FAST_PWM_MODE:
 				{
-					Flag_mode[TIMER_Select] = PWM_MODE;
+					PWM_Flag_mode[TIMER_Select] = PWM_MODE;
 					/*********** FAST PWM MODE *********/
 					TCCR2 |= ((1u << WGM21) | (1u << WGM20)); // FAST PWM MODE WGM21=1 & WGM20=1
 					DDRD |= (1u<<PD7); // OC2 PIN OUTPUT
@@ -1280,7 +1273,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 
 				case PHASE_CORRECT_MODE:
 				{
-					Flag_mode[TIMER_Select] = PWM_MODE;
+					PWM_Flag_mode[TIMER_Select] = PWM_MODE;
 					/*********** PHASE CORRECT MODE *********/
 					TCCR2 &= (~(1u << WGM21)); // PHASE CORRECT MODE  WGM21=0
 					TCCR2 |= (1u << WGM20);  // PHASE CORRECT MODE  WGM20=1
@@ -1302,7 +1295,7 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 				/**************************** END OF WGM MODE ****************************/
 			}
 
-			switch(Flag_mode[TIMER2])
+			switch(PWM_Flag_mode[TIMER2])
 			{
 				case NON_PWM_MODE:
 				{
@@ -1313,7 +1306,6 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 						// NORMAL_OPERATION_COM_MODE
 						case NORMAL_OPERATION:
 						{
-
 							TCCR2 &=  ~ (1u<<COM21);// NORMAL COM21=0 & COM20=0
 							TCCR2 &=  ~ (1u<<COM20); 	// NORMAL COM21=0 & COM20=0
 							break;
@@ -1438,7 +1430,6 @@ ACK TIMER_ID_init( TIMER_t TIMER_Select )
 				// NO INTERRUPT
 				case NO_INTERRUPT:
 				{
-
 					TIMSK &= (~ ( (1u<<OCIE2) | (1u<<TOIE2) ) );  //Overflow Interrupt & Output Compare Match Interrupt disable
 					break;
 				}
@@ -1857,13 +1848,12 @@ ACK TIMER_Start ( TIMER_t TIMER_Select )
 
 		 if ( (TIMER_cnfg_arr[TIMER_Select].timer == TIMER_Select) && (TIMER_cnfg_arr[TIMER_Select].IS_init==INITIALIZED) )
 		 {
-
 			 switch (TIMER_Select)
 			 {
 				 case TIMER0:
 				 {
 					 TCCR0 &= (0b11111000);		//TIMER0_CLEAR_PRESCALAR_BITS;
-
+					 TCNT0=0;
 					 switch(TIMER_cnfg_arr[TIMER_Select].prescalar)
 					 {
 						 case PRESCALER0:
@@ -1926,7 +1916,7 @@ ACK TIMER_Start ( TIMER_t TIMER_Select )
 				 {
 
 					 TIMER1_CLEAR_PRESCALAR_BITS;
-
+					 TCNT1=0;
 					 switch(TIMER_cnfg_arr[TIMER_Select].prescalar)
 					 {
 
@@ -1989,7 +1979,7 @@ ACK TIMER_Start ( TIMER_t TIMER_Select )
 				 case TIMER2:
 				 {
 					 TCCR2 &= (0b11111000);	//TIMER2_CLEAR_PRESCALAR_BITS;
-
+					 TCNT2=0;
 					 switch(TIMER_cnfg_arr[TIMER_Select].prescalar)
 					 {
 						 case PRESCALER0:
@@ -2020,7 +2010,6 @@ ACK TIMER_Start ( TIMER_t TIMER_Select )
 						 case PRESCALER128:
 						 {
 
-
 							 TCCR2 |= (0b00000101);
 							 break;
 						 }
@@ -2033,13 +2022,13 @@ ACK TIMER_Start ( TIMER_t TIMER_Select )
 
 						 case PRESCALER1024:
 						 {
-
 							 TCCR2 |= (0b00000111);
 							 break;
 						 }
 
 						 default:
 						 {
+							
 							 TIMER_cnfg_arr[TIMER_Select].IS_init=NOT_INITIALIZED;
 							 STATE=NAK;
 							 break;
@@ -2070,152 +2059,6 @@ ACK TIMER_Start ( TIMER_t TIMER_Select )
  }
 
 
-ACK PWM_generate( TIMER_t TIMER_Select , float Required_duty_cycle , uint8 type )
- {
-
-	 ACK STATE = AK ;
-	 uint16 Top;
-
-
-	 if((TIMER_cnfg_arr[TIMER_Select].timer == TIMER_Select) && (TIMER_cnfg_arr[TIMER_Select].IS_init==INITIALIZED) )
-	 {
-		 switch(TIMER_Select)
-		 {
-			 case TIMER0:
-			 {
-				 OCR0 = (255 * (float)(Required_duty_cycle/100));
-
-				 break;
-			 }
-
-			 case TIMER1:
-			 {
-
-				 Top=255;
-
-				 OCR1A= (uint16) ( Top * (float)(Required_duty_cycle/100) );
-				 break;
-			 }
-
-			 case TIMER2:
-			 {
-
-				 Top=255;
-				 OCR2 = (Top*(float)(Required_duty_cycle/100));
-
-				 break;
-			 }
-
-			 default:
-			 {
-				 // Should not be here
-				 STATE=NAK;
-				 break;
-			 }
-		 }
-
-		 switch(Flag_mode[TIMER_Select])
-		 {
-			 case NON_PWM_MODE:
-			 {
-				 if (TIMER_cnfg_arr[TIMER_Select].interrupt==INTERRUPT)
-				 {
-					 STATE= interrupt_PWM (TIMER_Select);
-
-					 if (type == INVERTING)
-					 {
-						 PWM_Value=0;
-						 //PWM_PORT &= ~(1<<PWM_PIN);
-
-
-					 }
-					 else if(type == NON_INVERTING)
-					 {
-						 PWM_Value=1;
-						// PWM_PORT |= (1<<PWM_PIN);
-
-					 }
-					 break;
-				 }
-
-
-				 else
-				 {
-					 STATE=NAK;
-					 break;
-				 }
-
-			 }
-
-			 case PWM_MODE:
-			 {
-				 break;
-			 }
-
-			 default:
-			 {
-				 STATE=NAK;
-				 break;
-			 }
-		 }
-
-	 }
-
-	 else
-	 {
-		 STATE=NAK;
-	 }
-
-
-	 TIMER_Start(TIMER_Select);
-	 return STATE;
- }
-
-
-ACK PWM_Channel_generate( TIMER_t TIMER_Select , Channel_t Channel_Select , float Required_duty_cycle , uint8 type )
-{
-
-	//-------------------------- For Application Purpose --------------------//
- uint16 Top;
- ACK STATE = AK;
-
- if((TIMER_cnfg_arr[TIMER_Select].timer == TIMER1) && (TIMER_cnfg_arr[TIMER_Select].IS_init==INITIALIZED) )
-	{
-	  switch (Channel_Select)
-	 {
-		case CHANNEL_A :
-		{
-			Top=255;
-
-			OCR1A= (uint16) ( Top * (float)(Required_duty_cycle/100) );
-			break;
-		}
-
-		case CHANNEL_B :
-		{
-			Top=255;
-
-			OCR1B= (uint16) ( Top * (float)(Required_duty_cycle/100) );
-			break;
-		}
-
-		case CHANNEL_A_B :
-		{
-			Top=255;
-			OCR1A= (uint16) ( Top * (float)(Required_duty_cycle/100) );
-			OCR1B= (uint16) ( Top * (float)(Required_duty_cycle/100) );
-			break;
-		}
-
-		default:
-		{
-			break;
-		}
-	}
-  }
-	 TIMER_Start(TIMER_Select);
-	 return STATE;
- }
 
 
 

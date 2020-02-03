@@ -115,8 +115,8 @@
 
 /* mode_no = 10 */
 #define PWM_PHASE_CORRECT_ICR1()   do{\
-									 TCCR1A &= (~(1<<WGM10);\
-									 TCCR1A |= (1<<WGM11));\
+									 TCCR1A &= (~(1<<WGM10));\
+									 TCCR1A |= (1<<WGM11) ;\
 									 TCCR1B &= (~(1<<WGM12));\
 									 TCCR1B |= (1<<WGM13);\
 									 }while(0)
@@ -235,32 +235,32 @@
 //___________ Channel A __________________//
 /* COM_Mode_no = 2*/
 #define COM_1A_PWM_NON_INVERTED() do{\
-									TCCR1A |= (1<<COM1A0);\
-								    TCCR1A &= (~(1<<COM1A1));\
+									TCCR1A |= (1<<COM1A1);\
+								    TCCR1A &= (~(1<<COM1A0));\
 								   }while(0)
 
 /* COM_Mode_no = 3*/
-#define COM_1A_PWM_INVERTED()		do{\
+#define COM_1A_PWM_INVERTED()	do{\
 									TCCR1A |= (1<<COM1A1) | (1<<COM1A0);\
 									}while(0)
 
 
 
 //___________ Channel B__________________//
+
+
+
 /* COM_Mode_no = 2*/
 #define COM_1B_PWM_NON_INVERTED()	do{\
-										TCCR1A |= (1<<COM1B1) | (1<<COM1B0);\
-									}while(0)
+									TCCR1A |= (1<<COM1B1);\
+									TCCR1A &= (~(1<<COM1B0));\
+									}while(0)	
 
 
 /* COM_Mode_no = 3*/
 #define COM_1B_PWM_INVERTED()	do{\
-									TCCR1A |= (1<<COM1B0);\
-									TCCR1A &= (~(1<<COM1B1));\
-								}while(0)	
-
-
-
+									TCCR1A |= (1<<COM1B1) | (1<<COM1B0);\
+								  }while(0)
 
 
 //-------------------------------------------------------------------------------------------------//
@@ -301,8 +301,8 @@
 
 //define Constants Macro :-
 
-#define INVERTING_PWM	  1
-#define NON_INVERTING_PWM 0
+#define INVERTING_PWM	  34
+#define NON_INVERTING_PWM 35
 
 
 //-------------------------------------------------------------------------------------------------//

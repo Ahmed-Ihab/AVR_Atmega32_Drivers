@@ -8,8 +8,10 @@
 #ifndef OS_CNFG_H_
 #define OS_CNFG_H_
 
-#include"std_types.h"
-#include"Timer.h"
+#include "std_types.h"
+#include "../MCAL/Timer/Timer.h"
+
+#define BUFFER_SIZE ((uint8)8)
 
 typedef enum {
 	TIMER_0, TIMER_1, TIMER_2
