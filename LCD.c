@@ -7,7 +7,6 @@
 //library
 
 #include "LCD.h"
-#include "Timer.h"
 
 #define DELAY_PERIOD_AFTER_ENABLE_HIGH 20
 #define DELAY_PERIOD_AFTER_ENABLE_LOW  20
@@ -24,7 +23,7 @@ uint8 Char_G;
 void LCD_4Bits_Initialization (void)
 {	
 		LCD_Init_Flag=1;
-		LCD_4Bits_DDR = 0xFF; 						//LCD port is output
+		//LCD_4Bits_DDR = 0xFF; 						//LCD port is output
 		LCD_4Bits_PORT &= ~ (1<<LCD_EN) ;			//LCD_EN = 0
 
 		LCD_4Bits_Write_Command (0x33) ;			//$33 for 4-bit mode
@@ -242,8 +241,8 @@ void LCD_4Bits_Print_Number(unsigned char row ,unsigned char column ,long num)
 
 void LCD_8Bits_Initialization (void )
 {
-	LCD_8Bits_DATA_DDR = 0xFF;			         //make the Data Port an Outport.
-	LCD_8Bits_COMMAND_DDR = 0xFF; 				 //make the Command Port an Outport.
+	//LCD_8Bits_DATA_DDR = 0xFF;			         //make the Data Port an Outport.
+	//LCD_8Bits_COMMAND_DDR = 0xFF; 				 //make the Command Port an Outport.
 	LCD_8Bits_COMMAND_PORT &= ~ (1<<LCD_EN) ;    //LCD_EN = 0
 	_delay_us(2000); 							 //wait for initialization and Stable Power.
 	LCD_8Bits_Write_Command (0x38) ; 			 //8-bits, LCD 2 line , 5x7 matrix
@@ -534,38 +533,51 @@ void LCD_Update (void)
 
 void LCD_Send_Byte(const uint8 Data , const uint8 Data_Flag)
 {
+	
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN4, 0);
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN5, 0);
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN6, 0);
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN7, 0);
-
+	
 	/*
 	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , 0);
 	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN5 , 0);
 	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN6 , 0);
 	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN7 , 0);
 	*/
-
+	
+	
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_RS, Data_Flag);
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_RW, 0);
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_EN, 0);
-
-
+	
+	/*
+	DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_RS , Data_Flag);
+	DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_RW , 0);
+	DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_EN , 0);
+	*/
+	
 	LCD_Delay();
 
-
 	// Write the Data (High nybble)
-
+	
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN4,( (Data & 0x10) == 0x10 ) );
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN5,( (Data & 0x20) == 0x20 ) );
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN6,( (Data & 0x40) == 0x40 ) );
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN7,( (Data & 0x80) == 0x80 ) );
-
-
+	
+	/*
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , ( (Data & 0x10) == 0x10 ) );
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , ( (Data & 0x20) == 0x20 ) );
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , ( (Data & 0x40) == 0x40 ) );
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , ( (Data & 0x80) == 0x80 ) );
+	*/
 
 	LCD_Delay();
 
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_EN,1 );
+	//DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_EN , 1);
+	
 	//Latch the High nybble
 
 	LCD_Delay();
@@ -574,38 +586,57 @@ void LCD_Send_Byte(const uint8 Data , const uint8 Data_Flag)
 	//DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_EN , 0);
 
 	LCD_Delay();
-
+	
+	
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN4, 0);
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN5, 0);
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN6, 0);
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN7, 0);
-
-
-
+	
+	/*
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , 0);
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN5 , 0);
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN6 , 0);
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN7 , 0);
+	*/
+	
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_RS, Data_Flag);
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_RW, 0);
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_EN, 0);
-
-
+	
+	/*
+	DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_RS , Data_Flag);
+	DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_RW , 0);
+	DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_EN , 0);
+	*/
 
 	LCD_Delay();
 
 	// Write the Data (LOW Nybble)
-
+	
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN4,( (Data & 0x01) == 0x01 ) );
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN5,( (Data & 0x02) == 0x02 ) );
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN6,( (Data & 0x04) == 0x04 ) );
 	GPIO_WritePortPin(LCD_4Bits_PORT, PIN7,( (Data & 0x08) == 0x08 ) );
-
+	
+	
+	/*
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , ( (Data & 0x01) == 0x01 ) );
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , ( (Data & 0x02) == 0x02 ) );
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , ( (Data & 0x04) == 0x04 ) );
+	DIO_Write_Pin(LCD_4Bits_PORT_ , PIN4 , ( (Data & 0x08) == 0x08 ) );
+	*/
 
 	LCD_Delay();
 
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_EN, 1);
+	//DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_EN , 1);
 	//Latch the Low nybble
 
 	LCD_Delay();
 
 	GPIO_WritePortPin(LCD_4Bits_PORT, LCD_EN, 0);
+	//DIO_Write_Pin(LCD_4Bits_PORT_ , LCD_EN , 0);
 
 	LCD_Delay();
 
@@ -679,6 +710,9 @@ void  LCD_Create_Character(const uint8 UDC_ID , const uint8 *const P_UDC)
 // This Function Provides a short delay for the LCD
 void LCD_Delay (void)
 {
+	_delay_us(15);
+	
+	/*
 	OCR0=30;
 	TIMER_Start(TIMER0);
 
@@ -686,32 +720,10 @@ void LCD_Delay (void)
 	TIFR |= 1<<OCF0 ;		//Clear the OCF0 By Writing Logic High (one) in TIRF
 
 	TIMER_Stop(TIMER0);
+	*/
 }
 
 
-/*
-void LCD_Keypad_Update (void)
-{
-	uint8 key;
-
-	keypad_Update();
-
-	if(Keypad_Get_Data_from_Buffer(&key) == 0)
-	{
-		//Buffer is empty
-		return;
-	}
-
-
-	LCD_Data_G[1][Char_G]= key;
-	Char_G++;
-
-	if(Char_G == LCD_CHARACTERS)
-	{
-		Char_G =0;
-	}
-}
-*/
 
 
 

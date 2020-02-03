@@ -14,12 +14,10 @@
 #endif
 
 //define libraries
-
+#include "std_types.h"
 #include <avr/io.h>
 #include <util/delay.h>
-#include "DIO.h"
-#include "Timer.h"
-
+#include "../MCAL/DIO/DIO.h"
 
 
 #define _4_BITS		1
@@ -50,7 +48,6 @@
 #define	LCD_RS           		 1				//LCD	RS	P0
 #define	LCD_RW    				 2				//LCD	RW	P1
 #define	LCD_EN     			     3				//LCD	EN	P2
-
 
 
 //---------------- Section of LCD with OS APIs --------------//
