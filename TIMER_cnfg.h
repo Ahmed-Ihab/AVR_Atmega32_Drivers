@@ -13,9 +13,9 @@
 #include "TIMER1_cnfg.h"
 
 
-typedef enum {timer0=0,timer1,timer2,NUM_OF_TIMERS=3,CHANNEL_A=10,CHANNEL_B=11,CHANNEL_A_B=12}TIMER_t; // types
+typedef enum {timer0=0,timer1,timer2,NUM_OF_TIMERS=3}TIMER_t; 
 	
-typedef enum {Channel_A=10,Channel_B,Channel_A_B}Channel_t; // types
+typedef enum {Channel_A=10,Channel_B,Channel_A_B}Timer1_Channel_t; // types
 
 #define MAX_NUM_OF_TIMERS 3
 #define NA 0xff
@@ -105,8 +105,13 @@ typedef enum {NORMAL_mode=10,CTC_mode=11,FAST_PWM_mode=12,PHASE_CORRECT_mode=13 
 
 
 /* INITIALIZATION	 */
-#define INITIALIZED			1
-#define NOT_INITIALIZED		0
+#ifndef INITIALIZED
+#define INITIALIZED			(1u)
+#endif
+
+#ifndef NOT_INITIALIZED
+#define NOT_INITIALIZED		(0u)
+#endif
 
 
 //Flag PWM
@@ -134,7 +139,7 @@ typedef enum {NORMAL_mode=10,CTC_mode=11,FAST_PWM_mode=12,PHASE_CORRECT_mode=13 
 typedef struct
 {
   uint8 timer;
-  uint8 WGM_mode;
+  TIMER_mode_t WGM_mode;
   uint8 COM_mode;
   uint8 interrupt;
   uint8 ICU;
