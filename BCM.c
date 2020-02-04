@@ -46,8 +46,6 @@ static Dispatcher_Status_t TX_Dispatcher_Status;		//this is the static variable 
 
 //------------------------------ Section of Static Global Pointers ---------------------------------//
 
-volatile static uint8 *g_BCM_RX_Buffer_ptr = NULL_PTR;
-
 
 //--------------------------------------------------------------------------------------------------//
 
@@ -313,6 +311,10 @@ static void RX_BCM_ISR_Handler(void)
 {
 	static volatile uint16 Local_u16_Data_Counter=0;
 	uint8 Local_u8_RX_Data;
+	
+	static uint8 Local_u16_Receiving_Data_length_Counter = 0;
+	static uint16 Local_u16_Received_Data_length = 0;
+	
 	UART_recieve(&Local_u8_RX_Data);
 	
 	if(LOCK==g_u8_Bcm_Rx_Req_Flag)
@@ -330,23 +332,36 @@ static void RX_BCM_ISR_Handler(void)
 				{
 					g_u8_Bcm_Rx_Status=RECEIVING_DATA_LENGTH;
 				}
+				
+				else
+				{
+					//Do Nothing
+				}
 				break;
 			}
 			
 			
 			case RECEIVING_DATA_LENGTH:
 			{
-				static uint8 Receiving_Data_length_Counter = 0;
-				 
-				RX_Frame.Data_length |= (uint16)Local_u8_RX_Data;				//Receive Least Byte
 				
-				Receiving_Data_length_Counter++;
+				Local_u16_Received_Data_length |= (uint16)Local_u8_RX_Data;				//Receive Least Byte
 				
-				if(Receiving_Data_length_Counter == 2)
+				Local_u16_Receiving_Data_length_Counter++;
+				
+				if(Local_u16_Receiving_Data_length_Counter == 2)
 				{
-					RX_Frame.Data_length |= (((uint16)Local_u8_RX_Data)<<8);		//Receive Highest Byte					
-					g_u8_Bcm_Rx_Status=RECEIVING_DATA;	
-					Receiving_Data_length_Counter=0;
+					Local_u16_Received_Data_length |= (((uint16)Local_u8_RX_Data)<<8);		//Receive Highest Byte					
+					
+					if(Local_u16_Received_Data_length <= RX_Frame.Data_length)
+					{
+						g_u8_Bcm_Rx_Status=RECEIVING_DATA;
+					}
+					
+					else
+					{
+						//Do Nothing
+					}
+					Local_u16_Receiving_Data_length_Counter=0;
 				}
 
 				break;
@@ -361,7 +376,7 @@ static void RX_BCM_ISR_Handler(void)
 					RX_Frame.Buffer_Data_Ptr++;
 					Local_u16_Data_Counter++;
 				}
-				if(Local_u16_Data_Counter == (RX_Frame.Data_length))
+				if(Local_u16_Data_Counter == Local_u16_Received_Data_length )
 				{
 					g_u8_Bcm_Rx_Status=RECEIVING_Checksum;
 				}
@@ -453,7 +468,7 @@ EnmBCMError_t BCM_Setup_Rx_Buffer(uint8* COPY_ptrRxBuffer,uint16 COPY_u16BufferS
 	else
 	{
 		RX_Frame._BCM_ID=BCM_ID;
-		RX_Frame.Data_length=0;
+		RX_Frame.Data_length=COPY_u16BufferSize;
 		RX_Frame.Buffer_Data_Ptr=COPY_ptrRxBuffer;
 		RX_Frame.Check_Sum=0;
 		BCM_ptrConsumerFuncRX = COPY_BCM_ptrConsumerFunc;
