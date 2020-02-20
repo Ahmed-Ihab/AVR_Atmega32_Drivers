@@ -95,6 +95,9 @@ static volatile BCM_ptrToFuncRX BCM_ptrConsumerFuncRX= NULL_PTR;
 
 static void TX_BCM_ISR_Handler (void);
 static void RX_BCM_ISR_Handler(void);
+static EnmBCMError_t COMM_Send (const BCM_ConfigType *ConfigPtr , const uint8 Data_to_sent);
+static EnmBCMError_t COMM_Receive (const BCM_ConfigType *ConfigPtr ,uint8 *Data_recieved);
+
 //--------------------------------------------------------------------------------------------------//
 
 
@@ -107,7 +110,19 @@ EnmBCMError_t BCM_Init(const BCM_ConfigType *ConfigPtr)
 		UART_init();
 		UART_Set_Callback_RX(RX_BCM_ISR_Handler);
 		UART_Set_Callback_TX(TX_BCM_ISR_Handler);	
-		// UART_Set_Callback_RX(void (*ptr)());
+	
+		TX_Dispatcher_Status = TX_IDLE;
+	}
+	
+	else if(ConfigPtr->Comm_ID == SPI)
+	{
+		//Should place the Functions related to SPI Communication Protocol
+		TX_Dispatcher_Status = TX_IDLE;
+	}
+		
+	else if(ConfigPtr->Comm_ID == I2C)
+	{
+		//Should place the Functions related to I2C Communication Protocol
 		TX_Dispatcher_Status = TX_IDLE;
 	}
 	
@@ -118,6 +133,62 @@ EnmBCMError_t BCM_Init(const BCM_ConfigType *ConfigPtr)
 	
 	return BCM_Error_Status;
 
+}
+
+EnmBCMError_t COMM_Send (const BCM_ConfigType *ConfigPtr , const uint8 Data_to_sent)
+{
+	EnmBCMError_t BCM_Error_Status = BCM_OK;
+
+	if(ConfigPtr->Comm_ID == UART)
+	{
+		UART_send(Data_to_sent);
+	}
+	
+	else if(ConfigPtr->Comm_ID == SPI)
+	{
+		// Should Call the Send Function of SPI
+	}
+	
+	else if(ConfigPtr->Comm_ID == SPI)
+	{
+		// Should Call the Send Function of I2C
+	}
+	
+	else
+	{
+		BCM_Error_Status = BCM_NOK;
+	}
+	
+	return BCM_Error_Status;
+	
+}
+
+EnmBCMError_t COMM_Receive (const BCM_ConfigType *ConfigPtr ,uint8 *Data_recieved)
+{
+	EnmBCMError_t BCM_Error_Status = BCM_OK;
+
+	if(ConfigPtr->Comm_ID == UART)
+	{
+		UART_recieve(Data_recieved);
+	}
+	
+	else if(ConfigPtr->Comm_ID == SPI)
+	{
+		// Should Call the Receive Function of SPI
+	}
+	
+	else if(ConfigPtr->Comm_ID == SPI)
+	{
+		// Should Call the Receive Function of I2C
+	}
+	
+	else
+	{
+		BCM_Error_Status = BCM_NOK;
+	}
+	
+	return BCM_Error_Status;
+	
 }
 
 
@@ -184,7 +255,7 @@ void BCM_TX_Dispatcher(void)
 					if(TX_Dispatcher_Counter == 0)									     // means it's the turn to send BCM_ID of the TX_Frame
 					{
 						TX_Dispatcher_Busy_Flag = BUSY; 
-						UART_send (TX_Frame._BCM_ID);
+						COMM_Send (&BCM_cnfg,TX_Frame._BCM_ID);
 						Current_Byte_test = TX_Frame._BCM_ID;
 					}
 						
@@ -193,8 +264,7 @@ void BCM_TX_Dispatcher(void)
 						TX_Dispatcher_Busy_Flag = BUSY; 
 						uint8 Least_Nibble_Data_Length = (uint8) TX_Frame.Data_length;
 						//Least_Nibble_Data_Length = 'L';								 //any value for testing only
-						UART_send (Least_Nibble_Data_Length);
-							
+						COMM_Send (&BCM_cnfg,Least_Nibble_Data_Length);	
 						Current_Byte_test = Least_Nibble_Data_Length;
 					}
 						
@@ -203,8 +273,7 @@ void BCM_TX_Dispatcher(void)
 						TX_Dispatcher_Busy_Flag = BUSY; 
 						uint8 Most_Nibble_Data_Length = (uint8) (TX_Frame.Data_length>>8);
 						//Most_Nibble_Data_Length = 'H';							     //any value for testing only
-						UART_send (Most_Nibble_Data_Length);
-							
+						COMM_Send (&BCM_cnfg,Most_Nibble_Data_Length);		
 						Current_Byte_test = Most_Nibble_Data_Length;
 							
 					}
@@ -217,16 +286,14 @@ void BCM_TX_Dispatcher(void)
 						if (TX_Buffer_Index == ((TX_Frame.Data_length)))						// means it's turn to send the checksum since we reached the end of th data as our first index is zero and last index will be Data Length - 1 and the checksum will be the when we reach the Data Length
 						{
 							//TX_Frame.Check_Sum = 'C';
-							UART_send (TX_Frame.Check_Sum);
+							COMM_Send (&BCM_cnfg,TX_Frame.Check_Sum);	
 							Current_Byte_test = TX_Frame.Check_Sum;
 							TX_Buffer_Index++;
 						}
 							
 						else if (TX_Buffer_Index < ((TX_Frame.Data_length)))					// means it's the turn to send the payload Data of the TX_Frame
 						{
-							
-							UART_send(Current_Byte);
-								
+							COMM_Send (&BCM_cnfg,Current_Byte);
 							TX_Buffer_Index++;
 							Current_Byte_test = Current_Byte;
 								
@@ -315,7 +382,7 @@ static void RX_BCM_ISR_Handler(void)
 	static uint8 Local_u16_Receiving_Data_length_Counter = 0;
 	static uint16 Local_u16_Received_Data_length = 0;
 	
-	UART_recieve(&Local_u8_RX_Data);
+	COMM_Receive ( &BCM_cnfg ,&Local_u8_RX_Data);
 	
 	if(LOCK==g_u8_Bcm_Rx_Req_Flag)
 	{
