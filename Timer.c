@@ -2374,10 +2374,6 @@ void Timer2_Interrupt_Handling (void)
 
 
 
-
-
-
-
 ISR(TIMER0_OVF_vect)
 {
 	if (g_callBackPtr0_OVF != NULL_POINTER)
@@ -2388,6 +2384,8 @@ ISR(TIMER0_OVF_vect)
 }
 
 
+#ifndef TIMER0_TICK
+
 ISR(TIMER0_COMP_vect)
 {
 	if (g_callBackPtr0_COMP != NULL_POINTER)
@@ -2397,6 +2395,9 @@ ISR(TIMER0_COMP_vect)
 }
 
 
+#endif
+
+#ifndef TIMER1_TICK
 
 ISR(TIMER1_OVF_vect)
 {
@@ -2416,6 +2417,11 @@ ISR(TIMER1_COMPA_vect)
 }
 
 
+#endif
+
+
+
+#ifndef TIMER2_TICK
 
 ISR(TIMER2_OVF_vect)
 {
@@ -2434,3 +2440,6 @@ ISR(TIMER2_COMP_vect)
 		g_callBackPtr2_COMP();
 	}
 }
+
+
+#endif

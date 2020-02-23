@@ -12,6 +12,45 @@
 
 #include "TIMER1_cnfg.h"
 
+#ifndef OS_SELECT
+#define FREERTOS		1
+#define YOUR_OWN_OS		2
+#define OS_SELECT   FREERTOS
+#endif
+
+#if OS_SELECT == FREERTOS
+
+#ifndef TIMER_OS_SELECT
+#define TIMER0_OS						1
+#define TIMER1_OS						2
+#define TIMER2_OS						3
+#define TIMER_OS_SELECT				TIMER2_OS
+
+#if TIMER_OS_SELECT == TIMER0_OS
+
+#define TIMER0_TICK
+
+#elif TIMER_OS_SELECT == TIMER1_OS
+
+#define TIMER1_TICK
+
+#elif TIMER_OS_SELECT == TIMER2_OS
+
+#define TIMER2_TICK
+
+#endif
+
+#endif
+
+#endif
+
+#if OS_SELECT == YOUR_OWN_OS
+
+#undef TIMER0_TICK
+#undef TIMER1_TICK
+#undef TIMER2_TICK
+
+#endif
 
 typedef enum {timer0=0,timer1,timer2,NUM_OF_TIMERS=3}TIMER_t; 
 	
