@@ -9,6 +9,15 @@
 #endif
 
 
+#ifndef OFF
+#define OFF	0
+#endif
+
+#ifndef ON
+#define ON	1
+#endif
+
+
 /* Boolean Data Type */
 typedef unsigned char bool;
 
@@ -26,6 +35,15 @@ typedef unsigned char bool;
 
 #ifndef NOT_INITIALIZED
 #define NOT_INITIALIZED		(0u)
+#endif
+
+
+#ifndef NA
+#define NA		(255u)
+#endif
+
+#ifndef NOT_DEFINED
+#define NOT_DEFINED        (255u)
 #endif
 
 
