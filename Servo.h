@@ -13,6 +13,6 @@
 #include "Servo_cfg.h"
 
 void SERVO_init(TIMER_t Timer);
-void SERVO_setAngle(uint8 Angle);
+Std_Func_t SERVO_setAngle(uint8 Angle);
 
 #endif /* SERVO_SERVO_H_ */
