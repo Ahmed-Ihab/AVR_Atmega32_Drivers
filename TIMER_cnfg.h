@@ -13,18 +13,25 @@
 #include "TIMER1_cnfg.h"
 
 #ifndef OS_SELECT
+
 #define FREERTOS		1
 #define YOUR_OWN_OS		2
-#define OS_SELECT   FREERTOS
+#define NO_OS			3
+
+#define OS_SELECT   NO_OS
+
 #endif
 
 #if OS_SELECT == FREERTOS
 
 #ifndef TIMER_OS_SELECT
+
 #define TIMER0_OS						1
 #define TIMER1_OS						2
 #define TIMER2_OS						3
-#define TIMER_OS_SELECT				TIMER2_OS
+#define NO_TIMER_OS						4
+
+#define TIMER_OS_SELECT				NO_TIMER_OS
 
 #if TIMER_OS_SELECT == TIMER0_OS
 
@@ -57,7 +64,10 @@ typedef enum {timer0=0,timer1,timer2,NUM_OF_TIMERS=3}TIMER_t;
 typedef enum {Channel_A=10,Channel_B,Channel_A_B}Timer1_Channel_t; // types
 
 #define MAX_NUM_OF_TIMERS 3
-#define NA 0xff
+
+#ifndef NA
+#define NA		(255u)
+#endif
 
 //----------------------------------- TIIMER_PINS ------------------------------------//
 

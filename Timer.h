@@ -44,7 +44,7 @@ ACK interrupt_time_delay (TIMER_t );
 ACK Update_Timer_TCNT_Register (TIMER_t , double  , Delay_unit_t );
 ACK TIMER_Stop (TIMER_t );
 ACK Enable_Timer_Interrupt (TIMER_t );
-void timer2_delay_ms(uint32 delay_value);
+
 
 ACK TIMER_Set_Mode ( TIMER_t TIMER_Select  , TIMER_mode_t Timer_mode );
 ACK TIMER_Set_Prescalar ( TIMER_t TIMER_Select  , prescaler_factor_t Prescaler_factor );
