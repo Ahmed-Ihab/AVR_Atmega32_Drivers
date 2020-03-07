@@ -49,13 +49,18 @@ typedef enum {Switch=0,keypad,LCD,LED,NUM_OF_PINS=28}PINS_t; // types
 #endif
 
 
-#define NA			        0xff
+#ifndef NA
+#define NA		(255u)
+#endif
 
 #define KEYPAD_PORT_	PORT_C
 #define LCD_4Bits_PORT_ PORT_A
 #define SWITCH_1_PORT_	PORT_B
 #define SWITCH_2_PORT_	PORT_C
 #define LED_PORT_		PORT_B
+
+#define SERVO_SIGNAL_PORT_ PORT_C
+#define SERVO_SIGNAL_PIN   PIN0
 
 #define SWITCH_PORT_CR  DDRB
 #define SWITCH_PORT_DR  PORTB
