@@ -27,8 +27,7 @@ static void Sorting_Tasks(void);
 //Call back function for the ISR to set the flag
 void ISR_Systick (void) 
 { 
-	PORTB ^= (1<<PB1);						// to test
-	PORTC ^= (1<<PC0);						// to test
+	
 	uint8 i=0;
 	
 	Task_Iterator = 0;
